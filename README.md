@@ -2,8 +2,8 @@
 
 A React component that synchronizes chart and DataTable (shadcn / Tanstack) views, built with  shadcn charts / Recharts. 
 
+(https://raw.githubusercontent.com/ardasisbot/linked-chart/linked_chart_demo.mov)
 
-https://github.com/ardasisbot/linked-chart/linked_chart_demo.mov
 
 ## Features
 
@@ -33,7 +33,7 @@ const chartAggregatorConfig = {
 };
 ```
 
-3. Inside your <DataTable>, call the <LinkedChart component:
+3. Inside your <DataTable , call the <LinkedChart component:
 ```tsx
 <LinkedChart 
   data={table.getFilteredRowModel().rows.map((row) => row.original)} 
