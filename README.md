@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Linked Chart & Table Component
 
-## Getting Started
+A React component that synchronizes chart and DataTable (shadcn / Tanstack) views, built with  shadcn charts / Recharts. 
 
-First, run the development server:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+https://github.com/ardasisbot/linked-chart/linked_chart_demo.mov
+
+## Features
+
+- 📊 Synchronized chart and table views
+- 🔍 Interactive chart selection filters table data
+- 📅 Multiple date format options (Month, Quarter, Year, etc.)
+- 📈 Configurable chart types (Area, Bar)
+
+
+## 📌 Acknowledgment
+
+This project was inspired by the work done in [zoom-chart-demo](https://github.com/shelwinsunga/zoom-chart-demo) by [@shelwin_]
+
+## Quick Start
+
+
+1. Copy  [LinkedChart](https://github.com/ardasisbot/linked-chart/blob/main/components/linked-chart.tsx) to your repo and import in your DataTable component:
+```tsx
+import { LinkedChart } from '@/components/linked-chart'
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Define how you want to aggregate your data for the chart:
+```tsx
+const chartAggregatorConfig = {
+  amount: (transaction) => (transaction.amount > 0 ? transaction.amount : 0),
+  largeAmount: (transaction) => (transaction.amount > 500 ? transaction.amount : 0),
+};
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Inside your <DataTable>, call the <LinkedChart component:
+```tsx
+<LinkedChart 
+  data={table.getFilteredRowModel().rows.map((row) => row.original)} 
+  columns={columns}
+  setColumnFilters={table.setColumnFilters}
+  dateField="posting_date_unix" 
+  aggregatorConfig={chartAggregatorConfig}
+  chartType="area"  
+  title="Linked Chart"
+/>
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+See https://github.com/ardasisbot/linked-chart/blob/main/app/examples/data-table.tsx for a complete example.
 
-## Learn More
+## Complete Example
 
-To learn more about Next.js, take a look at the following resources:
+Check out a [full implementation example](https://github.com/ardasisbot/linked-chart/blob/main/app/examples/data-table.tsx) with DataTable integration.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Notes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+You can also use the <LinkedChart> component without <DataTable> component. Useful for standalone charts.
+```tsx
+<LinkedChart 
+  data={data} 
+//   columns={columns}
+//   setColumnFilters={table.setColumnFilters}
+  dateField="posting_date_unix" 
+  aggregatorConfig={chartAggregatorConfig}
+  chartType="bar"  
+  title="Linked Chart"
+/>
+```
+## Dependencies
 
-## Deploy on Vercel
+- shadcn/ui / Recharts
+- date-fns
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+
+MIT
+
+## Author
+
+[@asisbot](https://x.com/asisbot)

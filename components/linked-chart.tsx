@@ -391,6 +391,10 @@ export function LinkedChart<TData extends object>({
   title = 'Chart',
   aggregatorConfig = defaultAggregatorConfig,
 }: LinkedChartProps<TData>) {
+
+  // Early return if data is empty
+  if (!data?.length) return null;
+  
   const [selectedFormat, setSelectedFormat] = useState<DateFormat>(dateFormat);
   const [selectedChartType, setSelectedChartType] = useState<ChartType>(chartType);
 
@@ -407,6 +411,7 @@ export function LinkedChart<TData extends object>({
     selectedFormat,
     setColumnFilters,
   });
+
 
   // Validations
   if (!isValidDataField<TData>(data, dateField)) {

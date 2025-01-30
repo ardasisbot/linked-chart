@@ -10,7 +10,7 @@ const steps = [
 	  icon: Zap,
 	},
 	{
-	  description: "Define how you want to aggregate your data for the chart",
+	  description: "Define how you want to aggregate the data for the chart",
 	  code: `const chartAggregatorConfig = {
     amount: (transaction: any) => (transaction.amount > 0 ? transaction.amount : 0),
     largeAmount: (transaction: any) => (transaction.amount > 500 ? transaction.amount : 0),
@@ -18,15 +18,16 @@ const steps = [
 	  icon: Code,
 	},
 	{
-	  description: "Call the LinkedChart component",
+	  description: "Call the LinkedChart component inside your DataTable",
 	  code: `<LinkedChart 
-		data={table.getFilteredRowModel().rows.map((row) => row.original)} 
-		columns={columns}
-		setColumnFilters={table.setColumnFilters}
-		dateField="posting_date_unix" 
-		aggregatorConfig={chartAggregatorConfig}
-		chartType="area"  
-		title="Linked Chart"/>`,
+	data={table.getFilteredRowModel().rows.map((row) => row.original)} 
+	columns={columns}
+	setColumnFilters={table.setColumnFilters}
+	dateField="posting_date_unix" 
+	aggregatorConfig={chartAggregatorConfig}
+	chartType="area"  
+	title="Linked Chart"
+	/>`,
 	  icon: Code,
 	},
   ];
@@ -55,7 +56,7 @@ const steps = [
 					<p className="text-muted-foreground mb-4">{step.description}</p>
 					<div className="bg-muted p-4 rounded-lg">
 					  <pre className="text-xs whitespace-pre-wrap break-words">
-						<code>{step.code}</code>
+						<code className="text-left">{step.code}</code>
 					  </pre>
 					</div>
 				  </div>
