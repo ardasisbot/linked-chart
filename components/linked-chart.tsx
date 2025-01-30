@@ -192,15 +192,15 @@ const groupDataByDate = <TData,>(
 };
 
 const DATE_FORMATS = [
-  'MMM yyyy',
-  "MM/DD/YYYY",
-  "DD/MM/YYYY",
-  "YYYY-MM-DD",
-  
-  // Add more formats as needed
-]
+  { value: 'MMM yyyy', label: 'Month (May 2024)' },
+  { value: 'QQQ yyyy', label: 'Quarter (Q2 2024)' },
+  { value: 'yyyy', label: 'Year (2024)' },
+  { value: 'MM/dd/yyyy', label: 'US Date (12/31/2024)' },
+  { value: 'dd/MM/yyyy', label: 'EU Date (31/12/2024)' },
+  { value: 'yyyy-MM-dd', label: 'ISO Date (2024-12-31)' },
+] as const;
 
-type DateFormat = typeof DATE_FORMATS[number];
+type DateFormat = typeof DATE_FORMATS[number]['value'];
 
 function DateFormatSelector({ 
   onFormatChange, 
@@ -220,7 +220,7 @@ function DateFormatSelector({
             className="w-[200px] justify-between"
           >
             <span className="truncate">
-              {selectedFormat}
+              {DATE_FORMATS.find(f => f.value === selectedFormat)?.label || selectedFormat}
             </span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
@@ -233,14 +233,14 @@ function DateFormatSelector({
               <CommandGroup>
                 {DATE_FORMATS.map((format) => (
                   <CommandItem
-                    key={format}
-                    value={format}
+                    key={format.value}
+                    value={format.value}
                     onSelect={(currentValue) => {
                       onFormatChange(currentValue as DateFormat);
                       setOpen(false);
                     }}
                   >
-                    {format}
+                    {format.label}
                   </CommandItem>
                 ))}
               </CommandGroup>
@@ -286,8 +286,8 @@ function isValidChartType(type: string): type is ChartType {
 }
 
 function isValidDateFormat(format: string): format is DateFormat {
-  if (!DATE_FORMATS.some(f => f === format)) {
-    throw new Error(`Invalid date format: ${format}. Must be one of: ${DATE_FORMATS.join(', ')}`);
+  if (!DATE_FORMATS.some(f => f.value === format)) {
+    throw new Error(`Invalid date format: ${format}. Must be one of: ${DATE_FORMATS.map(f => f.value).join(', ')}`);
   }
   return true;
 }
