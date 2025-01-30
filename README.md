@@ -13,9 +13,7 @@ A React component that synchronizes chart and DataTable (shadcn / Tanstack) view
 - 📈 Configurable chart types (Area, Bar)
 
 
-## 📌 Acknowledgment
-
-This project was inspired by the work done in [zoom-chart-demo](https://github.com/shelwinsunga/zoom-chart-demo) by [@shelwin_]
+This project was built upon by the work done in [zoom-chart-demo](https://github.com/shelwinsunga/zoom-chart-demo) by @shelwin_
 
 ## Quick Start
 
@@ -33,7 +31,7 @@ const chartAggregatorConfig = {
 };
 ```
 
-3. Inside your <DataTable , call the <LinkedChart component:
+3. Inside your <DataTable>, call the <LinkedChart> component:
 ```tsx
 <LinkedChart 
   data={table.getFilteredRowModel().rows.map((row) => row.original)} 
