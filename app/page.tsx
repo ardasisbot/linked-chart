@@ -33,7 +33,7 @@ export default async function Home() {
                 <li>Chart and table are synced: updated in one, reflected in the other</li>
                 <li>Drag on the chart to filter the table</li>
                 <li>Edit chart display from the menu</li>
-                <li>Copy the single file <Link href="MY LINK"><u>source code</u></Link></li>
+                <li>Copy the single file <Link href="https://github.com/ardasisbot/linked-chart/blob/main/components/linked-chart.tsx"><u>source code</u></Link></li>
                 <br/>
                 <HowtoSteps />
               </ul>
