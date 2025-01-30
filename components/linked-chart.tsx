@@ -1,20 +1,18 @@
 "use client";
 import * as React from "react";
-import { useState, useEffect, useMemo, useRef } from "react"
+import { useState, useMemo, useRef } from "react"
 
 import { format as formatDate, parse, addDays, addMonths, addYears, addQuarters } from "date-fns";
 import {
   Tabs,
-  TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs"
-import { Check, ChevronsUpDown } from "lucide-react"
+import { ChevronsUpDown } from "lucide-react"
 
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -55,10 +53,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
-  CommandShortcut,
 } from "@/components/ui/command"
-import { cn } from "@/lib/utils"
 
 
 
@@ -68,9 +63,9 @@ export interface GroupedData {
     [key: string]: number | string;
 }
 
-const CHART_TYPES = [
-  { 
-    value: 'area', 
+const CHART_TYPES = {
+  'area': { 
+    value: 'area' as const, 
     label: 'Area',
     component: Area,
     config: {
@@ -78,8 +73,8 @@ const CHART_TYPES = [
       fillOpacity: 0.2,
     }
   },
-  { 
-    value: 'bar', 
+  'bar': { 
+    value: 'bar' as const, 
     label: 'Bar',
     component: Bar,
     config: {
@@ -87,9 +82,9 @@ const CHART_TYPES = [
       fillOpacity: 0.5,
     }
   },
-] as const;
+} as const;
 
-type ChartType = typeof CHART_TYPES[number]['value'];
+type ChartType = keyof typeof CHART_TYPES;
 
 type AggregatorConfig<TData> = {
   [key: string]: (item: TData) => number;
@@ -99,16 +94,16 @@ const defaultAggregatorConfig = {
   transactionCount: () => 1,
 } as const;
 
-type LinkedChartProps<TData> = {
+interface LinkedChartProps<TData extends object = object> {
   data: TData[];
   columns?: ColumnDef<TData, any>[];
   setColumnFilters?: React.Dispatch<React.SetStateAction<ColumnFiltersState>>;
-  dateField: string;
+  dateField: keyof TData;
   dateFormat?: DateFormat;
   aggregatorConfig?: AggregatorConfig<TData>;
   chartType?: ChartType;
   title?: string;
-};
+}
 
 type DateLabel = string;
 
@@ -197,14 +192,15 @@ const groupDataByDate = <TData,>(
 };
 
 const DATE_FORMATS = [
-  { id: 'MMM yyyy', label: 'Short Month (May 2024)' },
-  { id: 'yyyy-MM', label: 'Year-Month (2024-05)' },
-  { id: 'yyyy-MM-dd', label: 'Full Date (2024-05-01)' },
-  { id: 'QQQ yyyy', label: 'Quarter (Q2 2024)' },
-  { id: 'yyyy', label: 'Year (2024)' },
-] as const;
+  'MMM yyyy',
+  "MM/DD/YYYY",
+  "DD/MM/YYYY",
+  "YYYY-MM-DD",
+  
+  // Add more formats as needed
+]
 
-type DateFormat = typeof DATE_FORMATS[number]['id'];
+type DateFormat = typeof DATE_FORMATS[number];
 
 function DateFormatSelector({ 
   onFormatChange, 
@@ -224,35 +220,30 @@ function DateFormatSelector({
             className="w-[200px] justify-between"
           >
             <span className="truncate">
-              {DATE_FORMATS.find(f => f.id === selectedFormat)?.label ?? "Select format..."}
+              {selectedFormat}
             </span>
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent align="end" className="w-[200px] p-0">
           <Command>
-            <CommandInput placeholder="Search formats..." />
-            <CommandList className="max-h-[400px]">
+            <CommandInput placeholder="Search date formats..." />
+            <CommandList>
               <CommandEmpty>No format found.</CommandEmpty>
-              {DATE_FORMATS.map((format) => (
-                <CommandItem
-                  key={format.id}
-                  value={format.id}
-                  className="flex items-center gap-2"
-                  onSelect={() => {
-                    onFormatChange(format.id);
-                    setOpen(false);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "h-4 w-4 shrink-0",
-                      selectedFormat === format.id ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  <span className="truncate">{format.label}</span>
-                </CommandItem>
-              ))}
+              <CommandGroup>
+                {DATE_FORMATS.map((format) => (
+                  <CommandItem
+                    key={format}
+                    value={format}
+                    onSelect={(currentValue) => {
+                      onFormatChange(currentValue as DateFormat);
+                      setOpen(false);
+                    }}
+                  >
+                    {format}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
             </CommandList>
           </Command>
         </PopoverContent>
@@ -263,14 +254,16 @@ function DateFormatSelector({
 
 
 
-const isValidDateField = <TData,>(columns: ColumnDef<TData>[], dateField: string) => {
+const isValidDateField = <TData,>(columns: ColumnDef<TData,any>[], dateField: string) => {
   const DATE_FILTER_EXAMPLE = `filterFn: (row, columnId, filterValue) => {
         const cellValue = row.getValue<number>(columnId);
         if (!filterValue?.start || !filterValue?.end) return true;
         return cellValue >= filterValue.start && cellValue <= filterValue.end;
       }`;
 
-  const dateColumn = columns.find(col => col.accessorKey === dateField);
+  const dateColumn = columns.find(col => 
+    (col as { accessorKey: string }).accessorKey === dateField
+  );
 
   if (!dateColumn?.filterFn) {
     throw new Error(`Column ${dateField} must have a filterFn. Example:\n${DATE_FILTER_EXAMPLE}`);
@@ -278,7 +271,7 @@ const isValidDateField = <TData,>(columns: ColumnDef<TData>[], dateField: string
   
   const fnString = dateColumn.filterFn.toString();
 
-  if (!fnString.includes('filterValue.start') || !fnString.includes('filterValue.end')) {
+  if (!fnString.includes('start') || !fnString.includes('end')) {
     throw new Error(`Column ${dateField} has incorrect filterFn.\nExpected:\n${DATE_FILTER_EXAMPLE}`);
   }
   
@@ -286,32 +279,21 @@ const isValidDateField = <TData,>(columns: ColumnDef<TData>[], dateField: string
 };
 
 function isValidChartType(type: string): type is ChartType {
-  if (!CHART_TYPES.some(t => t.value === type)) {
-    throw new Error(`Invalid chart type: ${type}. Must be one of: ${CHART_TYPES.map(t => t.value).join(', ')}`);
+  if (!Object.keys(CHART_TYPES).some(t => t === type)) {
+    throw new Error(`Invalid chart type: ${type}. Must be one of: ${Object.keys(CHART_TYPES).join(', ')}`);
   }
   return true;
 }
 
 function isValidDateFormat(format: string): format is DateFormat {
-  if (!DATE_FORMATS.some(f => f.id === format)) {
-    throw new Error(`Invalid date format: ${format}. Must be one of: ${DATE_FORMATS.map(f => f.id).join(', ')}`);
+  if (!DATE_FORMATS.some(f => f === format)) {
+    throw new Error(`Invalid date format: ${format}. Must be one of: ${DATE_FORMATS.join(', ')}`);
   }
   return true;
 }
 
-function isValidDataField<TData>(data: TData[], field: string): field is keyof TData {
-  if (data.length === 0) {
-    throw new Error('Data array cannot be empty');
-  }
-
-  if (!(field in data[0])) {
-    const availableFields = Object.keys(data[0]).join(', ');
-    throw new Error(
-      `Field "${field}" not found in data. Available fields: ${availableFields}`
-    );
-  }
-
-  return true;
+function isValidDataField<T extends object>(data: T[], field: keyof T): boolean {
+  return data.length > 0 && field in data[0];
 }
 
 function useChartInteraction<TData>({ 
@@ -399,7 +381,7 @@ function useChartInteraction<TData>({
   };
 }
 
-export function LinkedChart<TData>({ 
+export function LinkedChart<TData extends object>({ 
   data,
   columns,
   setColumnFilters,
@@ -421,14 +403,16 @@ export function LinkedChart<TData>({
     handleMouseUp,
     handleReset,
   } = useChartInteraction({
-    dateField,
+    dateField: dateField as string,
     selectedFormat,
     setColumnFilters,
   });
 
   // Validations
-  if (!isValidDataField(data, dateField)) throw new Error('Invalid date field');
-  if (columns && !isValidDateField(columns, dateField)) throw new Error('Invalid date field configuration');
+  if (!isValidDataField<TData>(data, dateField)) {
+    throw new Error('Invalid date field');
+  }
+  if (columns && !isValidDateField(columns, dateField as string)) throw new Error('Invalid date field configuration');
   if (!isValidDateFormat(dateFormat)) throw new Error('Invalid date format');
   if (!isValidChartType(chartType)) throw new Error('Invalid chart type');
 
@@ -449,7 +433,7 @@ export function LinkedChart<TData>({
 
   // Find the selected chart configuration
   const selectedChartConfig = useMemo(() => 
-    CHART_TYPES.find(type => type.value === selectedChartType)!,
+    CHART_TYPES[selectedChartType],
     [selectedChartType]
   );
 
@@ -475,13 +459,17 @@ export function LinkedChart<TData>({
                             </span>
                             <Tabs 
                               value={selectedChartType}
-                              onValueChange={(value: ChartType) => setSelectedChartType(value)}
+                              onValueChange={(value: string) => {
+                                if (value in CHART_TYPES) {
+                                  setSelectedChartType(value as ChartType)
+                                }
+                              }}
                               className="w-[200px]"
                             >
                               <TabsList className="grid w-full grid-cols-2">
-                                {CHART_TYPES.map(type => (
-                                  <TabsTrigger key={type.value} value={type.value}>
-                                    {type.label}
+                                {Object.keys(CHART_TYPES).map(type => (
+                                  <TabsTrigger key={type} value={type}>
+                                    {CHART_TYPES[type as ChartType].label}
                                   </TabsTrigger>
                                 ))}
                               </TabsList>
@@ -529,11 +517,7 @@ export function LinkedChart<TData>({
                               <defs>
                                   {Object.keys(aggregatorConfig).map((key, index) => {
                                       const color = chartUtils.getColor(index);
-                                      console.log(`Gradient for ${key}:`, {
-                                          index,
-                                          color,
-                                          gradientId: `gradient-${index}`
-                                      });
+
                                       return (
                                           <linearGradient 
                                               key={key} 

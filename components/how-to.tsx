@@ -1,6 +1,6 @@
 "use client"
 
-import { CheckCircle, Code, Layers, Zap } from "lucide-react";
+import { Code, Zap } from "lucide-react";
 import * as React from "react";
 
 const steps = [
