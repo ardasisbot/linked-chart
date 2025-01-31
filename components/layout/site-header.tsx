@@ -25,7 +25,7 @@ export async function SiteHeader({
           <nav className="flex items-center space-x-2">
             <Button asChild size="lg" variant="ghost" >
               <Link 
-                href="https://github.com/shelwinsunga/zoom-chart-demo" 
+                href="https://github.com/ardasisbot/linked-chart" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="flex items-center gap-2"
