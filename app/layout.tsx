@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
-// import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { Analytics } from "@vercel/analytics/react"
 
 import { TailwindIndicator } from "@/components/layout/tailwind-indicator";
 import { ThemeProvider } from "@/components/layout/theme-provider"
@@ -30,7 +30,7 @@ export default async function StickyLayout({ children }: StickyLayoutProps) {
           
         <TailwindIndicator />
         </ThemeProvider>
-      
+        <Analytics/>
       {/* <SiteFooter /> */}
     </div>
     </body>
